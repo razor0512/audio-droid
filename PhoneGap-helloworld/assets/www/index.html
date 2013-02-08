@@ -1,0 +1,20 @@
+<!DOCTYPE HTML> 
+<html> 
+<head> 
+<title>PhoneGap</title> 
+<script type="text/javascript" src="cordova-2.3.0.js"></script>
+<script type="text/javascript"> 
+/** Called when phonegap javascript is loaded */ 
+function onDeviceReady(){ 
+document.getElementById("helloworld").innerHTML="Hello World! Loaded PhoneGap Framework!"; 
+} 
+/** Called when browser load this page*/ 
+function init(){ 
+document.addEventListener("deviceready", onDeviceReady, true); 
+} 
+</script> 
+</head> 
+<body onLoad="init()"> 
+<h1 id="helloworld">...</h1> 
+</body> 
+</html>
