@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE HTML> 
 <html> 
 <head> 
@@ -20,4 +21,25 @@ document.addEventListener("deviceready", onDeviceReady, true);
 <h1 id="helloworld"></h1>
 <h1 id="phptest"></h1> 
 </body> 
+=======
+<!DOCTYPE HTML> 
+<html> 
+<head> 
+<title>PhoneGap</title> 
+<script type="text/javascript" src="cordova-2.3.0.js"></script>
+<script type="text/javascript"> 
+/** Called when phonegap javascript is loaded */ 
+function onDeviceReady(){ 
+document.getElementById("helloworld").innerHTML="Hello World! Loaded PhoneGap Framework!"; 
+} 
+/** Called when browser load this page*/ 
+function init(){ 
+document.addEventListener("deviceready", onDeviceReady, true); 
+} 
+</script> 
+</head> 
+<body onLoad="init()"> 
+<h1 id="helloworld">...</h1> 
+</body> 
+>>>>>>> f1b6adbabf7307b0d6d1ff83b2be40c4b37142b0
 </html>

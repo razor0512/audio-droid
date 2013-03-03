@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+<<<<<<< HEAD
 <resources>
 
     <string name="app_name">PhoneGap-helloworld</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
 
+=======
+<resources>
+
+    <string name="app_name">PhoneGap-helloworld</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+
+>>>>>>> f1b6adbabf7307b0d6d1ff83b2be40c4b37142b0
 </resources>
