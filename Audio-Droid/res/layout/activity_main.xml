@@ -1,38 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/screen" android:layout_width="fill_parent" android:layout_height="fill_parent" >
+
+    <ImageView
+        android:id="@+id/bg"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@drawable/android_sunglasses" />
+
     <LinearLayout android:orientation="vertical" android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true" android:layout_width="fill_parent" android:layout_height="fill_parent"
         android:weightSum="7" >
-        <LinearLayout android:layout_weight="6" android:orientation="vertical" android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true" android:layout_width="fill_parent" android:layout_height="0dip" >
 
-            <ImageView
-                android:id="@+id/bg"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:background="@drawable/bg" >
+</LinearLayout>
 
-            </ImageView>
-        </LinearLayout>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:orientation="vertical" >
 
-        <LinearLayout
-            android:id="@+id/buttons"
+        
+
+        <Button
+            android:id="@+id/buttonMode"
             android:layout_width="fill_parent"
-            android:layout_height="0dip"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_weight="1"
-            android:background="@drawable/graybar"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:weightSum="5" >
-
-            <View android:layout_weight="1" android:layout_width="0dip" android:layout_height="0dip" />
-            <Button android:id="@+id/btnPlay" android:layout_width="0dip" android:layout_height="fill_parent"
-                android:layout_weight="1" android:background="@drawable/play" android:layout_margin="5dp"
-                android:onClick="playmusic" />
-            <View android:layout_weight="1" android:layout_width="0dip" android:layout_height="0dip" />
-        </LinearLayout>
+            android:layout_height="wrap_content"
+            android:onClick="setMode"
+            android:text="Mode: RTSP" />
+        <Button
+            android:id="@+id/buttonConnect"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:onClick="connect"
+            android:text="Connect" />
+    <Button
+            android:id="@+id/buttonHelp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:onClick="help"
+            android:text="Help" />
+        
     </LinearLayout>
+
 </RelativeLayout>
