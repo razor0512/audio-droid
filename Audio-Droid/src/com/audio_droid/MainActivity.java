@@ -1,69 +1,55 @@
 package com.audio_droid;
 
-import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnInfoListener;
-import android.os.Bundle;
-import android.os.Handler;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.AssetFileDescriptor;
-import android.util.Log;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.PowerManager;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
 import com.spoledge.aacdecoder.AACPlayer;
 
 
 public class MainActivity extends Activity {
 	private static String logtag = "MainActivity";
 	MediaPlayer mplayer;
+	Pattern ipPattern = Pattern.compile("\\d{1,3}(?:\\.\\d{1,3}){3}(?::\\d{1,5})?");   
+	Pattern webPattern = Pattern.compile("^([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,65}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}$");
 	AACPlayer aacPlayer;
 	String urlpath;
 	Toast con;
 	boolean is_connect = false;
 	String lastinput="";
 	String mode="rtsp://";
+	int conAttempts = 0;
+	private PowerManager.WakeLock wl;
+	private static final String PREFS = "mypref";
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		/* Button buttonStart = (Button)findViewById(R.id.buttonConnect);        
-	     buttonStart.setOnClickListener(startListener); // Register the onClick listener with the implementation above
-	       
-	     Button buttonStop = (Button)findViewById(R.id.buttonDisconnect);        
-	     buttonStop.setOnClickListener(stopListener); // Register the onClick listener with the implementation above
-	     
-*/		
-		mplayer = new MediaPlayer();
-		//aacPlayer = new AACPlayer();
-		//urlpath = "rtsp://v2.cache7.c.youtube.com/CjYLENy73wIaLQnIH7D0dZO9IhMYDSANFEIJbXYtZ29vZ2xlSARSBXdhdGNoYIaU5_fj_qyZUQw=/0/0/0/video.3gp";
-		
-		Toast toast = Toast.makeText(getApplicationContext(), "URL: " + urlpath, Toast.LENGTH_LONG);
-	 	toast.show();
+		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);  
+		mplayer = new MediaPlayer();;
 		setContentView(R.layout.activity_main);
 	}
 	
-	/*//Create an anonymous implementation of OnClickListener
-    private OnClickListener startListener = new OnClickListener() {
-        public void onClick(View v) {
-          Log.d(logtag,"onClick() called - start button");              
-          Toast.makeText(MainActivity.this, "The Connect button was clicked.", Toast.LENGTH_LONG).show();
-          Log.d(logtag,"onClick() ended - start button");
-        }
-    };
-     
-    // Create an anonymous implementation of OnClickListener
-    private OnClickListener stopListener = new OnClickListener() {
-        public void onClick(View v) {
-         Log.d(logtag,"onClick() called - stop button"); 
-         Toast.makeText(MainActivity.this, "The Disconnect button was clicked.", Toast.LENGTH_LONG).show();
-          Log.d(logtag,"onClick() ended - stop button");
-        } 
-    };*/
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -72,6 +58,80 @@ public class MainActivity extends Activity {
 		return true;
 	}
 	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    // Handle item selection
+	    switch (item.getItemId()) {
+	        case R.id.urlhistory:
+	        	Intent myIntent = new Intent(this, UrlHistory.class);
+                startActivityForResult(myIntent, 0);
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode,
+	          Intent data) {
+			final Button connectButton = (Button) findViewById(R.id.buttonConnect);
+	      if (requestCode == 0) {
+	          if (resultCode == RESULT_OK) {
+	            String url = data.getStringExtra("selectedurl");
+	            	this.lastinput = url;
+	            	this.urlpath = url;
+	            	 try {
+	     				mplayer.setDataSource(mode + urlpath);
+	     				mplayer.setOnInfoListener(new MediaPlayer.OnInfoListener(){
+	     					public boolean onInfo(MediaPlayer mplayer, int what, int extra) {
+	     						return true;
+	     					}
+	     				});
+	     				
+	     				mplayer.prepare();
+	     				mplayer.start();
+	     				connectButton.setText("Disconnect");
+	     				is_connect = true;
+	     				
+	     			  }
+	     			  catch(Exception e){
+	     				  
+	     			  }
+	            	 if(mplayer.isPlaying()){
+	   				  Toast.makeText(getApplicationContext(), "Connected to: " + urlpath, Toast.LENGTH_LONG).show();
+	   				  final Handler h = new Handler();
+	   				  Runnable checkplaying = new Runnable()
+	   				    {
+
+	   				        @Override
+	   				        public void run()
+	   				        { 	
+	   							if(mplayer.isPlaying())
+	   								h.postDelayed(this, 2000);
+	   							else {
+	   					            Toast note = Toast.makeText(getApplicationContext(), "Host Disconnected", Toast.LENGTH_LONG);
+	   								note.show();
+	   							    is_connect = false;
+	   							    connectButton.setText("Connect");
+	   								mplayer.stop();
+	   								mplayer.reset();
+	   							}
+	   								
+	   				        }
+	   				    };
+	   				    h.postDelayed(checkplaying, 2000);
+	   			  }
+	   			  else
+	   			  {
+	   				  Toast.makeText(getApplicationContext(), "Could not connect to audio stream", Toast.LENGTH_LONG).show();
+	   				  connectButton.setText("Connect");
+	   				  mplayer.reset();
+	   				  is_connect = false;
+	   			  }
+	            	
+	          }
+	      }
+	}
 	 public void playmusic(View view){
 		 Context context = getApplicationContext();
 		 CharSequence text = "Playing";
@@ -112,7 +172,7 @@ public class MainActivity extends Activity {
 	 public void help(View view){
 		 AlertDialog.Builder alert = new AlertDialog.Builder(this);
 		 alert.setTitle("audio-droid Help");
-		 alert.setMessage("To use this app make sure your VLC server is up and running. You can choose either RTSP or HTTP in the mode button. Input the IP address by clicking the Connect button.");
+		 alert.setMessage("To use this app make sure your streaming server is up and running. This app is limited to RTSP connections only. Input the IP address by clicking the Connect button. Alternatively, you can select a url from your URL History in the options menu");
 		 alert.setNegativeButton("OK", new DialogInterface.OnClickListener() {
 			  public void onClick(DialogInterface dialog, int whichButton) {
 			    // Canceled.
@@ -122,7 +182,11 @@ public class MainActivity extends Activity {
 	 }
 	 
 	 public void connect(View view){
+//		  PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+//          wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "DoNjfdhotDimScreen");
+//		 	wl.acquire();
 		    final Button connectButton = (Button) view;
+			conAttempts = 0;
 		    if(!is_connect){
 		    AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
@@ -132,13 +196,41 @@ public class MainActivity extends Activity {
 			// Set an EditText view to get user input 
 			final EditText input = new EditText(this);
 			input.setText(lastinput);
-		    input.setHint("Enter url");
+		    input.setHint("e.g. 192.168.1.100:8554/stream");
 			alert.setView(input);
 
 			alert.setPositiveButton("Connect", new DialogInterface.OnClickListener() {
 			
 			  public void onClick(DialogInterface dialog, int whichButton) {
+			  String inpt = input.getText().toString().split("/")[0];
+			  Toast.makeText(getApplicationContext(), inpt , Toast.LENGTH_LONG).show();
+			  Matcher matcher = ipPattern.matcher(input.getText().toString().split("/")[0]);
+			  Matcher matcher2 = webPattern.matcher(input.getText().toString().split("/")[0]);
+			  boolean ipcheck = matcher.find() && matcher.group().equals(inpt);
+			  boolean webcheck = matcher2.find() && matcher2.group().equals(inpt);
+			  if(!(ipcheck || webcheck)) {
+				  Toast.makeText(getApplicationContext(), "Invalid URL", Toast.LENGTH_LONG).show();
+				  return;
+			  }
 			  urlpath = input.getText().toString();
+			  SharedPreferences urlprefs = getSharedPreferences(PREFS, 0);
+		      SharedPreferences.Editor editor = urlprefs.edit();
+			  if(!urlprefs.contains("urlprefs")) {
+				  editor.putString("urlprefs", urlpath);
+			  	  editor.commit();
+			  }
+			  else {
+				  final Set<String> values = new HashSet<String>(Arrays.asList(
+						  urlprefs.getString("urlprefs", "").split("@"))
+					);
+				  if(values.contains(urlpath) == false)
+				  {
+				  editor.putString("urlprefs", urlprefs.getString("urlprefs", "") + "@" + urlpath);
+				  editor.commit();
+				  }
+			  }
+			  
+			  
 			  lastinput = urlpath;
 			  connectButton.setText("Disconnect");
 				is_connect = true;
@@ -176,15 +268,36 @@ public class MainActivity extends Activity {
 							    connectButton.setText("Connect");
 								mplayer.stop();
 								mplayer.reset();
+//								if(conAttempts <= 2) {
+//								try {
+//									//mplayer.setDataSource("rtsp://192.168.1.100:8554/stream");
+//									mplayer.setDataSource(mode + urlpath);
+//									mplayer.setOnInfoListener(new MediaPlayer.OnInfoListener(){
+//										public boolean onInfo(MediaPlayer mplayer, int what, int extra) {
+//											return true;
+//										}
+//									}
+//									);
+//									mplayer.prepare();
+//									mplayer.start();
+//									h.postDelayed(this, 2000);
+//									conAttempts = 0;
+//									
+//								  }
+//								  catch(Exception e){
+//										h.postDelayed(this, 2000);
+//										conAttempts += 1;
+//								  }
+//								}
 							}
 								
 				        }
 				    };
-				    h.postDelayed(checkplaying, 1000);
+				    h.postDelayed(checkplaying, 2000);
 			  }
 			  else
 			  {
-				  Toast.makeText(getApplicationContext(), "Connection Error", Toast.LENGTH_LONG).show();
+				  Toast.makeText(getApplicationContext(), "Could not connect to audio stream", Toast.LENGTH_LONG).show();
 				  connectButton.setText("Connect");
 				  mplayer.reset();
 				  is_connect = false;
@@ -227,34 +340,9 @@ public class MainActivity extends Activity {
 				alert.show();
 		    }
 		 }
+	 
+	 
 	 }
-	 /*@Override
-	 protected void onStart() {//activity is started and visible to the user
-	  Log.d(logtag,"onStart() called");
-	  super.onStart();  
-	 }
-	 @Override
-	 protected void onResume() {//activity was resumed and is visible again
-	  Log.d(logtag,"onResume() called");
-	  super.onResume();
-	   
-	 }
-	 @Override
-	 protected void onPause() { //device goes to sleep or another activity appears
-	  Log.d(logtag,"onPause() called");//another activity is currently running (or user has pressed Home)
-	  super.onPause();
-	   
-	 }
-	 @Override
-	 protected void onStop() { //the activity is not visible anymore
-	  Log.d(logtag,"onStop() called");
-	  super.onStop();
-	   
-	 }
-	 @Override
-	 protected void onDestroy() {//android has killed this activity
-	   Log.d(logtag,"onDestroy() called");
-	   super.onDestroy();
-	 }*/
+
 
 

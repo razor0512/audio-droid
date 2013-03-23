@@ -20,15 +20,6 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:orientation="vertical" >
-
-        
-
-        <Button
-            android:id="@+id/buttonMode"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:onClick="setMode"
-            android:text="Mode: RTSP" />
         <Button
             android:id="@+id/buttonConnect"
             android:layout_width="fill_parent"

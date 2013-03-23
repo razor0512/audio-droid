@@ -7,10 +7,10 @@
     <uses-sdk
         android:minSdkVersion="10"
         android:targetSdkVersion="17" />
-    
+
     <uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.WAKE_LOCK" />
-	
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -25,5 +25,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.audio_droid.UrlHistory"
+            android:label="@string/title_activity_url_history"
+            android:parentActivityName="com.audio_droid.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.audio_droid.MainActivity" />
+        </activity>
     </application>
+
 </manifest>
